@@ -1,0 +1,26 @@
+modLoader = "javafml"
+loaderVersion = "[1,)"
+license = "MIT"
+issueTrackerURL = "https://github.com/"
+
+[[mods]]
+modId = "friendsmod"
+version = "1.0.0"
+displayName = "Friends Mod"
+description = '''Adds "anomaly" bots (anomaly006, anomaly008, anomaly009, anomaly010, anomaly011...) that look like players,
+stalk you in the dark, jumpscare you, and appear by name in the tab list (Tab key player list).'''
+authors = "you"
+
+[[dependencies.friendsmod]]
+    modId = "neoforge"
+    type = "required"
+    versionRange = "[21.1,)"
+    ordering = "NONE"
+    side = "BOTH"
+
+[[dependencies.friendsmod]]
+    modId = "minecraft"
+    type = "required"
+    versionRange = "[1.21.1]"
+    ordering = "NONE"
+    side = "BOTH"
