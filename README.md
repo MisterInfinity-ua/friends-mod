@@ -27,7 +27,7 @@ Prerequisites
 •	A terminal/command prompt
 Build Command
 Clone the repository and run the Gradle wrapper to build the .jar file:
-git clone https://github.com/yourusername/friendsmod.git
+git clone https://github.com/MisterInfinity-ua/friendsmod.git
 cd friendsmod
 ./gradlew build
 
