@@ -1,37 +1,95 @@
-# friends-mod
-👥 Friends Mod (NeoForge 1.21.1)
-A psychological horror Minecraft mod that populates your singleplayer world with "friends" who aren't actually your friends.
-This mod introduces creepy, player-like anomaly bots (anomaly006, anomaly008, anomaly009...) that stalk you from the shadows, show up in your Tab list, and disappear into thin air the moment they get too close.
-👁️ Features
-•	The "Friends" (Anomalies): Multiple variants of entities that look like players but are actually entities of pure dread.
-•	Psychological Terror: The anomalies do 0.0 physical damage. Instead, they hunt you psychologically—stalking you from a distance, staring, and executing a terrifying jumpscare/screamer sequence when they get close.
-•	Dynamic Tab List Spoofing: To trick you into thinking you aren't alone, these entities dynamically register themselves to the in-game Tab player list whenever they are near you. They will even show up with their custom "player" names!
-•	Natural Spawning: Anomalies naturally spawn in the dark (light level 5 or lower). They will stalk you in deep caves, dark forests, or unlit corners of your base.
-•	Ambient Dread: Uses static-corrupted Enderman audio cues, rare ambient whispers, and custom behavioral AI to keep you constantly on edge.
-🛠️ Installation
-	1.	Make sure you have NeoForge installed for Minecraft 1.21.1.
-	2.	Download the latest compiled .jar from the Releases tab.
-	3.	Drop the .jar file into your Minecraft mods folder:
-•	Windows: %appdata%\.minecraft\mods
-•	macOS: ~/Library/Application Support/minecraft/mods
-	4.	Launch the game and try not to look behind you.
-⚙️ Configuration
-You can customize the mod's behavior by editing the configuration file located in /config/friendsmod-common.toml.
-Option	Default Value	Description
-TAB_LIST_ENABLED	true	Toggle whether anomalies show up on the Tab player list.
-TAB_LIST_RANGE	48.0	The distance (in blocks) at which an anomaly starts appearing on your Tab list.
-💻 Developer & Build Instructions
-If you want to clone this repository and build the mod from source:
-Prerequisites
-•	Java 21 JDK
-•	A terminal/command prompt
-Build Command
-Clone the repository and run the Gradle wrapper to build the .jar file:
-git clone https://github.com/MisterInfinity-ua/friendsmod.git
-cd friendsmod
-./gradlew build
+# Friends Mod (NeoForge 1.21.1)
 
-Once built successfully, your compiled mod file will be located in:
-build/libs/friendsmod-1.0.0.jar
-📜 License
-This project is licensed under the MIT License. Feel free to use it, modify it, or include it in your custom modpacks!
+Мод додає "anomaly"-ботів: **anomaly006, anomaly008, anomaly009, anomaly010, anomaly011**.
+Вони:
+
+- виглядають як гравці (кастомна модель-скін через ресурспак мода);
+- переслідують гравця в темних місцях і тихо телепортуються ближче, поза полем зору;
+- лякають скримером: звук + fullscreen флеш + різка "тряска" камери + повідомлення в чат
+  + короткочасні реальні ефекти (нудота/сліпота);
+- **з'являються за ніком у списку гравців (клавіша Tab)**, поки хтось із гравців неподалік.
+
+## Структура
+
+```
+friendsmod/
+  build.gradle, settings.gradle, gradle.properties   — Gradle NeoForge (ModDevGradle)
+  src/main/java/com/friendsmod/
+    FriendsMod.java                — головний клас мода
+    config/FriendsConfig.java      — конфіг (config/friendsmod-common.toml після першого запуску)
+    entity/AnomalyEntity.java      — сутність-бот (спільна для всіх варіантів)
+    entity/ai/StalkPlayerGoal.java — переслідування + телепорт у темряві
+    entity/ai/JumpscareGoal.java   — тригер скримера
+    network/JumpscarePayload.java  — пакет сервер->клієнт для скримера
+    taglist/FakeTabListManager.java — показ ніку бота в Tab-списку гравців
+    registry/ModEntities.java, ModItems.java
+    client/...                     — рендерер, HUD-оверлей, обробка пакета
+    event/ServerEvents.java        — команда /friendsmod summon <variant>
+  src/main/resources/
+    META-INF/neoforge.mods.toml
+    assets/friendsmod/textures/entity/anomalyXXX.png  — ПЛЕЙСХОЛДЕР-скіни (згенеровані шумом)
+```
+
+## Збірка
+
+Потрібні: JDK 21, інтернет-доступ (Gradle сам підтягне Minecraft/NeoForge з maven.neoforged.net).
+Gradle wrapper вже в архіві (`gradlew`, `gradlew.bat`, `gradle/wrapper/...`) — окремо
+встановлювати Gradle не треба.
+
+```bash
+cd friendsmod
+./gradlew build      # macOS/Linux
+gradlew.bat build    # Windows
+```
+
+Версії в проєкті (`gradle.properties`, `build.gradle`) звірені з офіційним
+NeoForge MDK для 1.21.1 (net.neoforged.moddev 2.0.141, neo_version 21.1.235).
+
+Готовий джар з'явиться в `build/libs/friendsmod-1.0.0.jar`. Кинь його в `mods/` NeoForge 1.21.1
+клієнта та/або сервера (мод потрібен на обох сторонах, бо він мережевий).
+
+Для розробки/дебагу: `gradle runClient` або `gradle runServer`.
+
+> Якщо збірка впаде через дрібні відмінності мапінгів (Mojang-мапінги іноді трохи змінюються
+> між патч-версіями 1.21.1), найчастіше досить поправити 1-2 імпорти/сигнатури методів —
+> решта архітектури (реєстрація, AI, пакети, tab-list) правильна і не зміниться.
+
+## Як викликати бота
+
+```
+/friendsmod summon anomaly011
+```
+(потрібні права оператора, рівень 2). Бот з'явиться за кілька блоків від гравця.
+
+Або видай собі яйце-спавнер: `/give @s friendsmod:anomaly011_spawn_egg`.
+
+## Скіни ботів
+
+`assets/friendsmod/textures/entity/anomalyXXX.png` зараз — це **згенеровані шумом
+плейсхолдери** (64×64, стандартний layout скіна гравця), щоб мод одразу працював
+і нічого не крешило. Заміни їх на свої моторошні PNG 64×64 з тим самим layout'ом
+(як у стандартного скіна Steve) — рендерер підхопить автоматично, назва файлу
+має збігатися з ніком боту (`anomaly011.png` для `anomaly011` і т.д.).
+
+## Про Tab-список
+
+Технічно бот у Tab-списку — це `FakePlayer` (офіційний механізм NeoForge для
+"гравця без мережевого підключення"), для якого сервер шле ті самі пакети
+`ClientboundPlayerInfoUpdatePacket`, якими оновлюється список звичайних гравців.
+**Обмеження протоколу:** без підписаної Mojang-сервером skin-property в
+GameProfile сам маленький аватар у Tab-списку буде дефолтний Steve/Alex —
+підписати текстуру без офіційного акаунта Mojang неможливо. Вигляд бота
+**в самій грі** (сутність, яку видно у світі) від цього не залежить і використовує
+кастомну текстуру мода.
+
+## Конфіг
+
+`config/friendsmod-common.toml`: увімкнення/вимкнення мода, ліміт ботів на світ,
+кулдаун скримера, які варіанти дозволені, дальність показу в Tab-списку, які типи
+лякання активні.
+
+## Нотатка
+
+Мод — суто ігровий "хоррор"-контент (як популярні "Anomaly"/"Friends" моди на
+модпаках жахів) для одиночної гри чи приватного сервера з друзями. Немає жодних
+реальних зловмисних функцій — не збирає дані, не робить нічого поза грою.
